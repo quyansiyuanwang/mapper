@@ -5,7 +5,7 @@ def c_r_fetch(size_string):
             try:
                 row = int(size_string[:index])
                 col = int(size_string[index + 1:])
-            except Exception as e:
+            except Exception:
                 raise ValueError('size string is not format!')
     return row, col
    
@@ -77,7 +77,7 @@ class Map:
                 return resp
             else:
                 raise ValueError
-        except Exception as e:
+        except Exception:
             return False
             
     def __setitem__(self, location, replace):
@@ -86,8 +86,8 @@ class Map:
     def get_range(self, location, trans=False):
         collecter = lambda x,y: self._map[x if trans else y][y if trans else x]
         for x in turn_iterable(location[0]):
-                for y in turn_iterable(location[1]):
-                    yield collecter(x,y)
+            for y in turn_iterable(location[1]):
+                yield collecter(x,y)
                     
     def __str__(self):
         rep = ''
@@ -134,6 +134,28 @@ class Floor(Building):
         self.image = ' '
         
 
+class GameInfo:
+    GameOver = 'the game is over!'
+    GameRunning = 'the game is running'
+    LocationError = 'the position is wrong'
+    
+
+class FunctionBindArgument:
+    def __init__(self, function: callable, *arguments):
+        self.function = function
+        self.arguments = arguments
+
+    def release(self):
+        return self.function, self.arguments
+
+    def runit(self):
+        return self.function(*self.arguments)
+
+    def __repr__(self):
+        return f'func:{self.function}\n'\
+               f'args:{tuple(self.arguments)}'
+
+
 class Game:
     def __init__(self, _map, rule, player):
         self._map = _map
@@ -153,25 +175,22 @@ class Game:
 
     def act(self):
         action = self.rule.analyse(input('your action:'))
-        if action:       
-            errorlevel, result = action()
-            if result == 'end!':
-                return False
-            print(self._map)
-        return self
+        if action:
+            run_result = action.runit()
+            if run_result == GameInfo.GameRunning:
+                return True
+            elif run_result == GameInfo.GameOver:
+                return self.end()
+        return GameInfo.LocationError
 
     def start(self):
         self.player.location = self.spawn_point
         self.player.building_at = self._map[self.player.location]
-
-    def judge(self):
-        if self.player.location == self.exit_point:
-            return True, self.end()
-        return False, 'dk'
     
     def end(self):
         print(self._map, 'end!')
-        return 'end!'
+        return GameInfo.GameOver
+        
 
 class Player(Item):
     def __init__(self, _map):
@@ -192,29 +211,32 @@ class RuleMaze:
         self.fac = {'tp':self.teleport, \
         'w': self.move_key,'a': self.move_key,'s': self.move_key,'d': self.move_key}
         
+    def judge(self):
+        if self.player.location == self.game.exit_point:
+            return GameInfo.GameOver
+        return GameInfo.GameRunning
+    
     def teleport(self, location=None):
-        if location is None:
+        if not isinstance(location, Location):
             loc_info = input('to\t')
             point = loc_info.find(',')
             location = Location(int(loc_info[:point]),int(loc_info[point + 1:]))
+        
         if location in self.player.location.besides() or True:
-            loc_it = self._map[location]
-            if not isinstance(loc_it, Wall) and loc_it:
+            target_pos_building = self._map[location]
+            if not isinstance(target_pos_building, Wall) and target_pos_building:
+                
                 self._map[self.player.location] = self.player.building_at
-                self.player.building_at = loc_it
+                self.player.building_at = target_pos_building
                 
                 self.player.location = location
                 self.player.ut_loc()
-                res, info = self.game.judge()
-                if res:
-                    return res,info
-                return True, 'success'   
-            else:
-                return False, 'type of location is wrong'
-        else:
-            return False, 'step length is not one step'
+                
+                return self.judge()
+                
+        return GameInfo.LocationError
    
-    def move_key(self):
+    def move_key(self, action):
         def move_left(self):
             return Location(self.player.location[0] - 1, self.player.location[1])
    
@@ -229,34 +251,34 @@ class RuleMaze:
         
         fac = {'a':move_left,'d':move_right,'w':move_up,'s':move_down}
         for key_fac, refl in fac.items():
-            if self.action == key_fac:
+            if action == key_fac:
                 return self.teleport(refl(self))            
                 
     def analyse(self, action):
-        self.action = action
         for action_type, refl in self.fac.items():
             if action == action_type:
-                return refl
-        else:
-            return False
+                return FunctionBindArgument(refl, action)
+
     
 if __name__=='__main__':   
-    m = Map('5x5', 	[{'location':[(range(5),range(5))],'content':Floor()},	\
-    	{'location':[((1,3),range(1,4)),(1,0),(3,4)],'content':Wall()}],\
-    	complete_trans=True)
+    m = Map('5x5', 	[{'location':[(range(5),range(5))],'content':Floor()},\
+    {'location':[((1,3), range(1,4)),(1,0),(3,4)],'content':Wall()}],\
+    complete_trans=True)
     m.T = True
-    p = Player(m)
-    #print(*(m.get_range([1, (0, 1, 3)])))
-    #print(m[Location(1,0)])
+
     print('-'*15)
+    p = Player(m)
     ru = RuleMaze(m,p)
     game = Game(m, ru, p)
     ru.game = game
     game.spawn_set(Location(0,0))
     game.exit_set(Location(4,4))
     game.start()
-    print(game)
+    
     res = True
-    while res:
+    while res != GameInfo.GameOver:
+        print(m)
         res = game.act()
+        
+        
     
