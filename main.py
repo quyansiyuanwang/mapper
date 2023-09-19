@@ -60,7 +60,7 @@ class RuleMaze:
 
     
 if __name__=='__main__':
-    coupler = Init()
+    coupler = Init(RuleMaze)
     coupler.setmap('5x5', 
     [
         {'location':[(range(5),range(5))],'content':Floor()},
