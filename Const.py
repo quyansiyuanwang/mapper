@@ -8,13 +8,28 @@ class Item:
  
 class Building(Item):
     pushable = False
+    weight = None
+    
+    getable = False
+    getlevel = None
+    
     interoperable = False
+
+    
     
                     
 class Wall(Building):
     def __init__(self):
         self.repr = 'wall'
         self.image = '#'
+
+
+
+class Floor(Building):
+    def __init__(self):
+        self.repr = 'floor'
+        self.image = ' '
+        
 
 class ExitPoint(Building):
     def __init__(self):
@@ -28,14 +43,8 @@ class SpawnPoint(Building):
         self.image = 'S'
         
         
-class Floor(Building):
-    def __init__(self):
-        self.repr = 'floor'
-        self.image = ' '
-        
-
 class GameInfo:
     GameOver = 'the game is over!'
     GameRunning = 'the game is running'
     LocationError = 'the position is wrong'
-    
+    UserTypeError = 'the content user inputed is unsolvable'
