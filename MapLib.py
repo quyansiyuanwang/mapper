@@ -13,7 +13,7 @@ class Map:
         self.row, self.col = c_r_fetch(self.size)
         self._map = [[None]*self.row for _ in range(self.col)]
         if self.map_content is not None:
-            self.complete_map(complete_trans)
+            self.complete_map(self.complete_trans)
     
     def __getitem__(self, dest):
         try:
