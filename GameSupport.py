@@ -69,7 +69,9 @@ class Player(Item):
         self.location = None
         self._map = _map
         self.image = 'P'
-        self.building_at =None
+        self.building_at = None
+        self.strength = None
+        self.level = None
         
     def ut_loc(self):
         self._map[self.location] = self
@@ -80,14 +82,15 @@ class Init:
         self.type_rule = type_rule
         self._map = Map()
         self._player = Player(self._map)
-        self._rule = type_rule(self._map, self._player)
-        self._game = Game(self._map, self._rule, self._player)
-        self._rule.game = self._game
+        self.reset_RuleGame()
 
-    def setmap(self, *args, **kwargs):
-        self._map = Map(*args, **kwargs)
-        self._player = Player(self._map)
+    def reset_RuleGame(self):
         self._rule = self.type_rule(self._map, self._player)
         self._game = Game(self._map, self._rule, self._player)
         self._rule.game = self._game
+    
+    def setmap(self, *args, **kwargs):
+        self._map = Map(*args, **kwargs)
+        self._player = Player(self._map)
+        self.reset_RuleGame()
         
