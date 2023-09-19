@@ -14,8 +14,6 @@ class Building(Item):
     getlevel = None
     
     interoperable = False
-
-    
     
                     
 class Wall(Building):
@@ -48,3 +46,4 @@ class GameInfo:
     GameRunning = 'the game is running'
     LocationError = 'the position is wrong'
     UserTypeError = 'the content user inputed is unsolvable'
+    RunTimeError = 'the error raised while game running'

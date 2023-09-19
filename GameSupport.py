@@ -13,6 +13,9 @@ class Location(object):  # 位置信息类
     def __eq__(self, other):
         return self.col == other.col and self.row == other.row
 
+    def __add__(self, other: iter):
+        return Location(self.col + other[0], self.row + other[1])
+
     def __getitem__(self, index):
         return self.col if index == 0 else self.row
 
@@ -63,15 +66,38 @@ class Game:
         return GameInfo.LocationError
 
 
+class RuleBase:
+    def __init__(self, _map, player, game=None):
+        self.game = game
+        self._map = _map
+        self.player = player
+        self.actions = {}
+        
+    def get_position(self, action):
+        move_keys = {
+            'w':(0, -1),
+            'a':(-1, 0),
+            's':(0, 1),
+            'd':(1, 0)
+        }
+        refl = move_keys.get(action, None)
+        if refl is not None:
+            return self.player.location + refl
+            
+    def analyse(self, action):
+        action = action.lower()
+        refl = self.actions.get(action, None)
+        if refl is not None:
+            return FunctionBindArgument(refl, action)
+        
+
 class Player(Item):
     def __init__(self, _map):
         self.steps = 0
         self.location = None
         self._map = _map
         self.image = 'P'
-        self.building_at = None
-        self.strength = None
-        self.level = None
+        self.building_at =None
         
     def ut_loc(self):
         self._map[self.location] = self
@@ -80,7 +106,7 @@ class Player(Item):
 class Init:
     def __init__(self, type_rule):
         self.type_rule = type_rule
-        self._map = Map()
+        self._map = None
         self._player = Player(self._map)
         self.reset_RuleGame()
 
@@ -93,4 +119,22 @@ class Init:
         self._map = Map(*args, **kwargs)
         self._player = Player(self._map)
         self.reset_RuleGame()
+        self._map.T = True
         
+    def mainloop(self, show_map: bool = True, ignore_error: bool = True, *others):
+        loop = [FuncBindArg for FuncBindArg in others]
+        loop = [FunctionBindArgument(self._game.act)] + loop
+        if show_map:
+            loop = [FunctionBindArgument(print, self._map)] + loop
+        
+        
+        while True:
+            for operation in loop:
+                run_result = operation.runit()
+                if run_result == GameInfo.RunTimeError and not ignore_error:
+                    raise RuntimeError
+                elif run_result == GameInfo.UserTypeError and not ignore_error:
+                    raise SyntaxError
+                elif run_result == GameInfo.GameOver:
+                    return run_result
+                    
