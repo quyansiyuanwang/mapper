@@ -66,15 +66,15 @@ if __name__=='__main__':
         {'location':[(range(5),range(5))],'content':Floor()},
         {'location':[((1,3), range(1,4)),(1,0),(3,4)],'content':Wall()}
     ],
-        T = True,
         complete_trans=True)
-    
+        
+    coupler._map.T = True
     coupler._game.spawn_set(Location(0,0))
     coupler._game.exit_set(Location(4,4))
     coupler._game.start()
     
     res = True
     while res != GameInfo.GameOver:
-        print(m)
+        print(coupler._map)
         res = coupler._game.act()
         

@@ -77,6 +77,7 @@ class Player(Item):
 
 class Init:
     def __init__(self, type_rule):
+        self.type_rule = type_rule
         self._map = Map()
         self._player = Player(self._map)
         self._rule = type_rule(self._map, self._player)
@@ -85,4 +86,8 @@ class Init:
 
     def setmap(self, *args, **kwargs):
         self._map = Map(*args, **kwargs)
+        self._player = Player(self._map)
+        self._rule = self.type_rule(self._map, self._player)
+        self._game = Game(self._map, self._rule, self._player)
+        self._rule.game = self._game
         
