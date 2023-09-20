@@ -3,7 +3,7 @@ from GameSupport import *
 
 class RuleMaze(RuleBase):  # 继承RuleBase基类
     def __init__(self, _map, player, game=None, allow_tp=False):
-        super().__init__(_map, player, game)  # 向父类传参
+        super().__init__(_map, player)  # 向父类传参
         self.allow_tp = allow_tp
         # actions定义行为
         self.actions = {'tp':self.teleport, \
@@ -38,7 +38,7 @@ class RuleMaze(RuleBase):  # 继承RuleBase基类
                 self.player.building_at = target_pos_building
                 # 更新玩家位置，并赋值于地图中
                 self.player.location = location
-                self.player.ut_loc()
+                self.player.update()
                 # 判断游戏状态
                 return self.judge()
                 

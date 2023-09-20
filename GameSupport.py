@@ -63,7 +63,7 @@ class Game:
         """
         self.player.location = self.spawn_point
         self.player.building_at = self._map[self.player.location]
-        self.player.ut_loc()
+        self.player.update()
     
     def end(self):
         """游戏结束"""
@@ -125,7 +125,7 @@ class Player(Item):
         self.image = 'P'  # 玩家符号标识
         self.building_at = None  # 被替换的地图内容
         
-    def ut_loc(self):
+    def update(self):
         """用玩家于地图中覆盖"""
         self._map[self.location] = self
         
