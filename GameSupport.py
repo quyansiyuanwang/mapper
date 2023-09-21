@@ -124,6 +124,9 @@ class Player(Item):
         self._map = _map  # 数据通信用
         self.image = 'P'  # 玩家符号标识
         self.building_at = None  # 被替换的地图内容
+        self.strength = 0  # 玩家力量
+        self.bag = {}  # 玩家背包
+        self.level = 0  # 玩家等级
         
     def update(self):
         """用玩家于地图中覆盖"""
